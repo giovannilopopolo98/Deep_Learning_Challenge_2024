@@ -12,3 +12,12 @@ Il file 'main.py' fornito dal professore contiene vari parametri modificabili pe
 - numero massimo di epoche ('max_epochs'),
 - directory per i checkpoint ('ckpt_dir')
 - directory dei dati ('data_dir').
+
+
+## Miglior modello
+Il miglior modello trovato finora è salvato in depth_37.pth che ha ottenuto:
+Epoch [37/50]
+Loss: 1.2892
+Evaluation = - RMSE + SSIM = -3.0335
+RMSE on VALIDATION : 3.3329
+SSIM on VALIDATION : 0.2994
