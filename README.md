@@ -1,4 +1,4 @@
-"# Deep_Learning_Challenge_2024" 
+# Deep_Learning_Challenge_2024
 
 La challenge di deep learning viene usata come progetto valutativo. Essa richiede la stima della profondità in ogni pixel di un'immagine RGB per generare una DepthMap, con una codifica colore per la distanza dagli oggetti. Il professore ha assegnato un dataset per il progetto di stima della profondità monoculare, chiamato DepthEstimationUnreal, che include immagini RGB come input e ground truth di profondità come supervisione. Il dataset è organizzato in due sottocartelle: RGB (contenente immagini .jpg) e depth (contenente file di profondità .npy). Ciascuna di queste cartelle ha tre sottocartelle per train, validation e test (la cartella test è vuota e sarà utilizzata solo per la valutazione finale del modello, senza accesso ai dati). 
 
