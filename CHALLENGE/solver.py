@@ -3,7 +3,7 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from dataset import DepthDataset
-from torchvision import transforms
+from torchvision import transforms, models
 from utils import visualize_img, ssim
 from model import DepthEstimationModel
 
@@ -25,31 +25,13 @@ class Solver():
         # Inizializzazione della miglior valutazione 
         self.best_evaluation_score = float('-inf')
 
-        # Inizializzazione della loss function
-        # self.loss_fn = torch.nn.L1Loss()
-        
-
-        # # Trasformazioni per il dataset di training: Data Augmentation
-        # self.train_transform = transforms.Compose([
-        #     transforms.RandomHorizontalFlip(),
-        #     transforms.RandomVerticalFlip(),
-        #     transforms.RandomRotation(20),
-        #     transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
-        #     transforms.ToTensor(),
-        # ])
-
-        # Nessuna trasformazione per il dataset di validazione
-        # val_transform = transforms.Compose([transforms.ToTensor()])
-
         # Creazione dei DataLoader per il training e la validazione
         if self.args.is_train:
             self.train_data = DepthDataset(train=DepthDataset.TRAIN,
-                                           data_dir=args.data_dir,
-                                           transform=None)
+                                           data_dir=args.data_dir)
             
             self.val_data = DepthDataset(train=DepthDataset.VAL,
-                                         data_dir=args.data_dir,
-                                         transform=None)
+                                         data_dir=args.data_dir)
 
             # Creazione dei DataLoader per il training e la validazione
             self.train_loader = DataLoader(self.train_data,
@@ -66,11 +48,11 @@ class Solver():
             if not os.path.exists(args.ckpt_dir):
                 os.makedirs(args.ckpt_dir)
 
-
         else:
             self.test_set = DepthDataset(train=DepthDataset.TEST, data_dir=self.args.data_dir)
             ckpt_file = os.path.join("checkpoint", self.args.ckpt_file)
             self.net.load_state_dict(torch.load(ckpt_file, weights_only=True))
+    
 
     def fit(self):
         for epoch in range(self.args.max_epochs):
@@ -91,7 +73,14 @@ class Solver():
                 # Calcolo della loss combinata
                 l1_loss = F.l1_loss(output, depth)  # Calcola la loss L1 per l'accuratezza numerica della DepthMap
                 ssim_loss = 1 - ssim(output, depth) # Calcola la loss SSIM per la similarità strutturale 
-                loss = l1_loss + ssim_loss          # Calcola la loss totale 
+                # hub_loss = F.huber_loss(output, depth)
+
+                # Pesi delle diverse loss
+                alpha = 1.0
+                beta = 1.0
+                # gamma = 0.0
+
+                loss = alpha*l1_loss + beta*ssim_loss # Calcola la loss totale 
 
                 # Backward pass
                 self.optimizer.zero_grad() # Azzera i gradienti
@@ -173,7 +162,6 @@ class Solver():
         # Stampa i risultati della valutazione
         print(f"RMSE on VALIDATION : {avg_rsme:.4f}")
         print(f"SSIM on VALIDATION : {avg_ssim:.4f}") 
-
         print(f"Evaluation Score on VALIDATION : {evaluation_score:.4f}")
 
         return avg_rsme, avg_ssim
