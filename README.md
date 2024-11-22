@@ -21,15 +21,14 @@ Le immagini di input sono immagini RGB in formato `.jpg`, mentre le ground truth
 
 Il modello ha ottenuto i seguenti risultati migliori durante l'allenamento:
 
-- Miglior modello con Evaluation: -2.4402
-- RMSE on VALIDATION : 2.9236
-- SSIM on VALIDATION : 0.4835
-- Evaluation Score on VALIDATION : -2.4402
-- VALIDATION: RMSE=2.9236, SSIM=0.4835
-- SUMMARY (Epoch 72): Train -> RMSE=1.3962, SSIM=0.7162 | Validation -> RMSE=2.9236, SSIM=0.4835               
-- Epoch [73/100], Loss: 0.7741
+- **Epoca Migliore**: [73/100]
+- **Loss** : 0.7741
+- **RMSE** : 2.9236
+- **SSIM** : 0.4835
+- **Evaluation Score**: -2.4402
+- **SUMMARY** (Epoch 72): Train -> RMSE=1.3962, SSIM=0.7162 | Validation -> RMSE=2.9236, SSIM=0.4835               
 
-- **Epoca migliore**: 83
+- **Epoca migliore**: [83/100]
 - **RMSE**: 2.9697
 - **SSIM**: 0.4728
 - **Evaluation Score**: -2.4969
