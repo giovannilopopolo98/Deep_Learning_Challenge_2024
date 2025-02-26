@@ -1,114 +1,63 @@
 import torch
 import torch.nn as nn
+import torchvision.models as models
+from torchvision.models import ResNet34_Weights
 
 class DepthEstimationModel(nn.Module):
     def __init__(self):
         super(DepthEstimationModel, self).__init__()
         
-        # Encoder con Batch Normalization
-        self.enc1 = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
-            nn.MaxPool2d(2)  # Riduce la dimensione dell'immagine della metà
-        )
-        
-        self.enc2 = nn.Sequential(
-            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(),
-            nn.MaxPool2d(2)  # Riduce la dimensione dell'immagine della metà
-        )
-        
-        self.enc3 = nn.Sequential(
-            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(256),
-            nn.ReLU(),
-            nn.MaxPool2d(2)  # Riduce la dimensione dell'immagine della metà
-        )
-        
-        self.enc4 = nn.Sequential(
-            nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(512),
-            nn.ReLU(),
-            nn.MaxPool2d(2)  # Riduce la dimensione dell'immagine della metà
-        )
+        # Utilizza ResNet34 pre-addestrato come encoder
+        resnet = models.resnet34(weights=ResNet34_Weights.IMAGENET1K_V1)
+        self.encoder_layers = nn.Sequential(*list(resnet.children())[:-2])  # Remove the fully connected layer
 
-        # Bottleneck Layer
-        self.bottleneck = nn.Sequential(
-            nn.Conv2d(512, 1024, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(1024),
-            nn.ReLU()
-        )
+        freeze_until = 4
+
+        # Congelare i primi 'freeze_until' layer
+        layer_count = 0
+        for child in resnet.children():
+            layer_count += 1
+            if layer_count <= freeze_until:
+                for param in child.parameters():
+                    param.requires_grad = False
         
-        # Decoder con ConvTranspose e Skip Connections (utilizzando U-Net come riferimento)
-        self.dec4 = nn.Sequential(
-            nn.ConvTranspose2d(1024, 512, kernel_size=2, stride=2),
-            nn.ReLU()
+        # Decoder per upsample
+        self.decoder = nn.Sequential(
+            # First ConvTranspose2d Layer
+            nn.ConvTranspose2d(512, 256, kernel_size=4, stride=2, padding=1), 
+            nn.BatchNorm2d(256),
+            nn.ReLU(inplace=True),
+            
+            # Second ConvTranspose2d Layer
+            nn.ConvTranspose2d(256, 128, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
+
+            nn.Conv2d(128, 128, kernel_size=1, stride=1),
+            
+            # Third ConvTranspose2d Layer
+            nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1),                                                                                                                                                                                                                                                                                                                                                         
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            
+            # Fourth ConvTranspose2d Layer
+            nn.ConvTranspose2d(64, 32, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True),
+
+            nn.Conv2d(32, 32, kernel_size=1, stride=1),
+            
+            # Fifth ConvTranspose2d Layer for final upsampling
+            nn.ConvTranspose2d(32, 1, kernel_size=4, stride=2, padding=1),
+
+            nn.Conv2d(1, 1, kernel_size=1, stride=1)
         )
-        
-        self.dec3 = nn.Sequential(
-            nn.ConvTranspose2d(512 + 512, 256, kernel_size=2, stride=2),  # Include le skip connections
-            nn.ReLU()
-        )
-        
-        self.dec2 = nn.Sequential(
-            nn.ConvTranspose2d(256 + 256, 128, kernel_size=2, stride=2),  # Include le skip connections
-            nn.ReLU()
-        )
-        
-        self.dec1 = nn.Sequential(
-            nn.ConvTranspose2d(128 + 128, 64, kernel_size=2, stride=2),  # Include le skip connections
-            nn.ReLU()
-        )
-        
-        # Output Layer per la DepthMap
-        self.output_layer = nn.Conv2d(64 + 64, 1, kernel_size=1)  # Convoluzione per ottenere l'output con 1 canale
     
     def forward(self, x):
-        # Encoder con salvataggio dei tensori per le skip connections
-        enc1_out = self.enc1(x)  # Primo livello dell'encoder
-        enc2_out = self.enc2(enc1_out)  # Secondo livello dell'encoder
-        enc3_out = self.enc3(enc2_out)  # Terzo livello dell'encoder
-        enc4_out = self.enc4(enc3_out)  # Quarto livello dell'encoder
+        # Encoder pass
+        features = self.encoder_layers(x)  # (batch_size, 512, 7, 7)
         
-        # Bottleneck
-        bottleneck_out = self.bottleneck(enc4_out)
-
-        # Decoder con Skip Connections
-        dec4_out = self.dec4(bottleneck_out)
-
-        # Utilizziamo l'interpolazione per assicurare che le dimensioni siano le stesse prima di concatenare
-        if dec4_out.size() != enc4_out.size():
-            enc4_out = torch.nn.functional.interpolate(enc4_out, size=dec4_out.shape[2:], mode='nearest')
-        
-        dec4_out = torch.cat((dec4_out, enc4_out), dim=1)  # Skip connection con output dell'encoder livello 4
-        
-        dec3_out = self.dec3(dec4_out)
-        
-        if dec3_out.size() != enc3_out.size():
-            enc3_out = torch.nn.functional.interpolate(enc3_out, size=dec3_out.shape[2:], mode='nearest')
-        
-        dec3_out = torch.cat((dec3_out, enc3_out), dim=1)  # Skip connection con output dell'encoder livello 3
-        
-        dec2_out = self.dec2(dec3_out)
-
-        if dec2_out.size() != enc2_out.size():
-            enc2_out = torch.nn.functional.interpolate(enc2_out, size=dec2_out.shape[2:], mode='nearest')
-
-        dec2_out = torch.cat((dec2_out, enc2_out), dim=1)  # Skip connection con output dell'encoder livello 2
-        
-        dec1_out = self.dec1(dec2_out)
-
-        if dec1_out.size() != enc1_out.size():
-            enc1_out = torch.nn.functional.interpolate(enc1_out, size=dec1_out.shape[2:], mode='nearest')
-
-        dec1_out = torch.cat((dec1_out, enc1_out), dim=1)  # Skip connection con output dell'encoder livello 1
-        
-        # Output finale
-        depth = self.output_layer(dec1_out)
+        # Decoder pass
+        depth = self.decoder(features)     # Output finale atteso: (batch_size, 1, 224, 224)  
         
         return depth
-
-# Esempio di utilizzo
-model = DepthEstimationModel()
