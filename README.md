@@ -38,7 +38,6 @@ Risultati visivi Validation
 
 Risultati visivi Test
 ![Image](https://github.com/user-attachments/assets/bef12426-cda5-43be-96d5-7be4d41ff4fa)
-![Image](https://github.com/user-attachments/assets/2b6d408e-1a5a-4997-a3ce-245e468fea53)
 
 
 I pesi ricavati dal modello possono essere richiesti, non pote do caricarli su Github essendo il file molto grande
