@@ -17,7 +17,6 @@ Il file 'main.py' fornito dal professore contiene vari parametri modificabili pe
 ## Miglior modello
 Il miglior modello trovato finora ha ottenuto:
 Loss: 0.7666
-Evaluation = - RMSE + SSIM = -3.0335
 
 Training set:
 - RMSE on TRAIN : 0.579466572321883
