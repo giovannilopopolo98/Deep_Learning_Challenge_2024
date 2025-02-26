@@ -31,11 +31,13 @@ Test set:
 - SSIM on TEST : 0.6457219939482847
 
 Risultati visivi Train 
-![Image](https://github.com/user-attachments/assets/bef12426-cda5-43be-96d5-7be4d41ff4fa)
 ![Image](https://github.com/user-attachments/assets/3dd3364a-1fbd-4ebb-b821-313a2a79c7d6)
 
 Risultati visivi Validation
 ![Image](https://github.com/user-attachments/assets/9445fda1-14bc-478c-b91d-4cffeec958fe)
+
+Risultati visivi Test
+![Image](https://github.com/user-attachments/assets/bef12426-cda5-43be-96d5-7be4d41ff4fa)
 ![Image](https://github.com/user-attachments/assets/2b6d408e-1a5a-4997-a3ce-245e468fea53)
 
 
