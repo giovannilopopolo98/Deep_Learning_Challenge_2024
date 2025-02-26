@@ -15,9 +15,18 @@ Il file 'main.py' fornito dal professore contiene vari parametri modificabili pe
 
 
 ## Miglior modello
-Il miglior modello trovato finora è salvato in depth_37.pth che ha ottenuto:
-Epoch [37/50]
-Loss: 1.2892
+Il miglior modello trovato finora ha ottenuto:
+Loss: 0.7666
 Evaluation = - RMSE + SSIM = -3.0335
-RMSE on VALIDATION : 3.3329
-SSIM on VALIDATION : 0.2994
+
+Training set:
+RMSE on TRAIN : 0.579466572321883
+SSIM on TRAIN: 0.856304222290669
+
+Validation set:
+RMSE on VALIDATION : 2.810505590940777
+SSIM on VALIDATION: 0.5213211429746527
+
+Test set:
+RMSE on TEST : 2.218269580288937
+SSIM on TEST : 0.6457219939482847
