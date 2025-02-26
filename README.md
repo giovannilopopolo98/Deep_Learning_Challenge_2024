@@ -34,3 +34,6 @@ Test set:
 ![Image](https://github.com/user-attachments/assets/3dd3364a-1fbd-4ebb-b821-313a2a79c7d6)
 ![Image](https://github.com/user-attachments/assets/9445fda1-14bc-478c-b91d-4cffeec958fe)
 ![Image](https://github.com/user-attachments/assets/2b6d408e-1a5a-4997-a3ce-245e468fea53)
+
+
+I pesi ricavati dal modello possono essere richiesti, non pote do caricarli su Github essendo il file molto grande
